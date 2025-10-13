@@ -1,11 +1,11 @@
 // Spam detection keywords
 const SPAM_KEYWORDS = {
+  highOverride: [
+    'vitalii'
+  ],// keywords that always override AI
   high: [
-    'buy now', 'click here', 'free money', 'make money fast', 'earn cash',
-    'investment opportunity', 'get rich', 'prize winner',
-    'congratulations you won', 'claim your prize', 'limited time offer',
-    'act now', 'subscribe to my channel', 'check out my channel', 'sub4sub',
-    'onlyfans', 'telegram', 'whatsapp me', 'dm me', 'text me at','check out my video',
+    'click here', 'subscribe to my channel', 'check out my channel', 'sub4sub',
+    'whatsapp me', 'dm me', 'text me at','check out my video',
     'click link', 'check out my new video', 'vitalii', 'Buy crypto now!',
   ],
   medium: [
@@ -36,6 +36,16 @@ function classifyByKeywords(text) {
   }
 
   return 'safe';
+}
+// Check for high override keywords (always spam)
+function isHighOverride(text) {
+  const lowerText = text.toLowerCase();
+  for (const keyword of SPAM_KEYWORDS.highOverride) {
+    if (lowerText.includes(keyword.toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
 }
 
 
@@ -69,22 +79,23 @@ async function classifyWithAI(text, aiSession, aiAvailable) {
 
 // Hybrid classification: Keywords + AI
 async function classifyComment(text, aiSession, aiAvailable) {
+  // Check if this is an override keyword
+  if (isHighOverride(text)) {
+    return { classification: 'spam', usedAI: false }; // Always spam, never rewritten by AI
+  }
+
   // TIER 1: Fast keyword check
   const keywordResult = classifyByKeywords(text);
 
-  // If obviously spam or safe, return immediately
-  if (keywordResult === 'spam' || keywordResult === 'safe') {
-    return { classification: keywordResult, usedAI: false };
-  }
-
-  // TIER 2: Use AI for ambiguous "suspicious" cases
-  if (keywordResult === 'suspicious' && aiAvailable) {
+  // If spam or safe, now uses AI for everything that's NOT override
+  if ((keywordResult === 'spam' || keywordResult === 'suspicious') && aiAvailable) {
+    // Ask AI to rewrite
     const aiResult = await classifyWithAI(text, aiSession, aiAvailable);
     return { classification: aiResult, usedAI: true };
   }
 
-  // Fallback: No AI available
-  return { classification: 'suspicious', usedAI: false };
+  // For 'safe' (and when no AI), fallback to keywordResult
+  return { classification: keywordResult, usedAI: false };
 }
 
 // ============================================
@@ -176,6 +187,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     try {
       // Check if the API exists
       if (typeof LanguageModel === 'undefined') {
+        console.log(typeof LanguageModel);
         console.log('Spamurai: LanguageModel API not available');
         return false;
       }
@@ -356,7 +368,6 @@ function isChannelOwnerComment(threadElement) {
     if (isProcessingAI || !aiAvailable || suspiciousComments.length === 0) {
       return;
     }
-
     isProcessingAI = true;
 
     // Process in batches of 5 for better performance
@@ -368,7 +379,7 @@ function isChannelOwnerComment(threadElement) {
       // Process batch in parallel
       await Promise.all(batch.map(async ({ text, thread }) => {
         try {
-          const aiResult = await classifyWithAI(text, aiSession, aiAvailable);
+          const aiResult =  await classifyWithAI(text, aiSession, aiAvailable);
 
           // Update stored classification
           const stored = analyzedComments.get(text);
