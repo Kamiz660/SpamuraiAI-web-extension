@@ -1,13 +1,13 @@
 // Spam detection keywords
 const SPAM_KEYWORDS = {
   high: [
-    'buy now', 'click here', 'free money', 'make money fast', 'earn cash',
-    'bitcoin', 'crypto', 'investment opportunity', 'get rich', 'prize winner',
-    'congratulations you won', 'claim your prize', 'limited time offer',
-    'act now', 'subscribe to my channel', 'check out my channel', 'sub4sub',
-    'onlyfans', 'telegram', 'whatsapp me', 'dm me', 'text me at'
+    'vitali',
   ],
   medium: [
+    'buy now', 'click here', 'free money', 'make money fast', 'earn cash',
+    'get rich', 'claim your prize', 'limited time offer',
+    'act now', 'subscribe to my channel', 'check out my channel', 'sub4sub',
+    'onlyfans', 'telegram', 'whatsapp me', 'dm me', 'text me at',
     'check out', 'visit my', 'link in bio', 'click link', 'follow me',
     'thanks for sharing', 'great info', 'nice video', 'awesome content',
     'check my channel', 'new video', 'subscribe', 'sub back'
@@ -42,18 +42,26 @@ async function classifyWithAI(text, aiSession, aiAvailable) {
   }
 
   try {
+    console.log(`Spamurai: Sending to AI: "${text.substring(0, 60)}..."`);
+    
     const result = await aiSession.prompt(
-      `Is this YouTube comment spam?\n\nComment: "${text}"\n\nAnswer:`
+      `Is this YouTube comment on its on spam?\n\nComment: "${text}"\n\nAnswer:`
     );
 
     const response = result.toLowerCase().trim();
+    
+    // Log the raw AI response
+    console.log(`Spamurai: Raw AI response: "${response}"`);
 
     // Parse AI response
     if (response.includes('spam')) {
+      console.log(`Spamurai: AI classified as SPAM`);
       return 'spam';
     } else if (response.includes('safe')) {
+      console.log(`Spamurai: AI classified as SAFE`);
       return 'safe';
     } else {
+      console.log(`Spamurai: AI response unclear, defaulting to SUSPICIOUS`);
       return 'suspicious'; // Unclear response
     }
 
@@ -193,11 +201,12 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
 
       // Create AI session with spam detection prompt
       aiSession = await LanguageModel.create({
-        systemPrompt: `You are a spam detector for YouTube comments. 
-        Analyze if a comment is spam or legitimate.
-        Spam includes: self-promotion, scams, bots, fake engagement, phishing.
-        Legitimate includes: genuine opinions, questions, discussions.
-        Reply with ONLY one word: "spam" or "safe".`,
+        initialPrompts: [
+          {
+            role: 'system',
+            content: `Detect scam indicators in YouTube comment section. Check for: pressure/urgency, fake testimonial followed by a product or person's name, vague/unrealistic promises, requests for sensitive data, false crypto claims, specific trader names, robotic tone. Respond with only: "spam" or "safe"`
+          }
+        ],
         expectedInputs: [
           { type: "text", languages: ["en"] }
         ],
@@ -268,13 +277,17 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   // Analyze comments with instant keyword detection
   async function analyzeComments() {
     const threads = document.querySelectorAll('ytd-comment-thread-renderer');
+    console.log(`Spamurai: Found ${threads.length} comment threads`);
     let newSuspicious = [];
 
     for (const thread of threads) {
-      const commentEl = thread.querySelector('#content-text');
-      const text = commentEl ? commentEl.textContent.trim() : null;
-
-      if (!text) continue;
+        const commentEl = thread.querySelector('#content-text');
+        const text = commentEl ? commentEl.textContent.trim() : null;
+  
+        // Skip empty/null comments
+        if (!text) continue;
+        
+        console.log(`Spamurai: Analyzing comment: "${text.substring(0, 60)}..."`);
 
       // Skip if already analyzed
       if (analyzedComments.has(text)) {
@@ -286,6 +299,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
 
       // INSTANT keyword classification (no await, no AI yet)
       const keywordResult = classifyByKeywords(text);
+      console.log(`Spamurai: Keyword classification = ${keywordResult}`);
 
       // Store with element reference
       analyzedComments.set(text, {
@@ -303,19 +317,26 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
         highlightComment(thread, keywordResult);
       } else if (keywordResult === 'suspicious') {
         // Apply suspicious highlight immediately
+        console.log(`Spamurai: Comment marked SUSPICIOUS - queuing for AI`);
         highlightComment(thread, 'suspicious');
         // Queue for AI refinement
         if (aiAvailable || aiSession) {
           newSuspicious.push({ text, thread });
+          console.log(`Spamurai: AI available = ${aiAvailable}, adding to queue`);
+        } else {
+          console.log(`Spamurai: AI not available (aiSession=${!!aiSession}, aiAvailable=${aiAvailable})`);
         }
       }
     }
 
     // Add new suspicious comments to queue
     if (newSuspicious.length > 0) {
+      console.log(`Spamurai: ${newSuspicious.length} new suspicious comments to process with AI`);
       suspiciousComments = [...suspiciousComments, ...newSuspicious];
       // Process AI in background without blocking
       processSuspiciousWithAI();
+    } else {
+      console.log(`Spamurai: No suspicious comments found in this batch`);
     }
 
     // Send stats to popup immediately
