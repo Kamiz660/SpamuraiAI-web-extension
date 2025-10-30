@@ -44,6 +44,7 @@ If Spamurai AI isn’t working properly, follow these steps:
 
 1. Open a new tab and go to: chrome://flags
 2. Set "Enables optimization guide on device" to "Enabled BypassPerfRequirement"
+   -It’s a support flag Google uses to let the local AI service run even on systems that don’t meet performance checks.
 3. Click relaunch Chrome popup
 
 ## Working Example
