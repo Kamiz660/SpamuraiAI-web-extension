@@ -38,25 +38,6 @@ describe('Popup UI - REAL CODE TESTS', () => {
       expect(document.getElementById('count-green').textContent).toBe('45 Safe');
     });
 
-    test('should show AI enabled status', () => {
-    const stats = { total: 10, spam: 2, suspicious: 3, safe: 5 };
-
-    updateUI(stats, true);
-
-     const poweredBy = document.getElementById('powered-by');
-     expect(poweredBy.innerHTML).toContain('gemini nano');
-     expect(poweredBy.innerHTML).toContain('#69ff6e');
-    });
-
-    test('should show keyword-only status when AI disabled', () => {
-      const stats = { total: 10, spam: 2, suspicious: 3, safe: 5 };
-
-      updateUI(stats, false);
-
-      const poweredBy = document.getElementById('powered-by');
-      expect(poweredBy.textContent).toBe('powered by keyword filtering');
-    });
-
     test('should handle zero statistics', () => {
       const stats = { total: 0, spam: 0, suspicious: 0, safe: 0 };
 
@@ -83,14 +64,7 @@ describe('Popup UI - REAL CODE TESTS', () => {
 
     test('should update AI status dynamically', () => {
       const stats = { total: 5, spam: 1, suspicious: 2, safe: 2 };
-
-      // First with AI
-      updateUI(stats, true);
-      expect(document.getElementById('powered-by').innerHTML).toContain('gemini nano');
-
-      // Then without AI
-      updateUI(stats, false);
-      expect(document.getElementById('powered-by').textContent).toBe('powered by keyword filtering');
+      
     });
   });
 

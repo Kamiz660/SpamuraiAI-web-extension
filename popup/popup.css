@@ -1,118 +1,201 @@
+/* --- Base Styles with Darker Palette & Glow --- */
 body {
-    min-width: 300px;
+    width: 300px;
     min-height: 400px;
-    font-family: Arial, sans-serif;
-    padding: 15px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 20px;
     margin: 0;
     box-sizing: border-box;
-    display: flex;          
-    flex-direction: column; 
-    align-items: center;   
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: space-between;
-    background-color: black;
-    color: #ffffff;
-    border: 2px solid rgba(255, 0, 0, 0.677);
-    border-radius: 10px;
+    background-color: #0a0a0a; 
+    color: #f0f0f0;
+    border-radius: 12px;
     overflow: hidden;
+    position: relative;
+    border: 2px solid;
+    animation: borderGlow 3s ease-in-out infinite;
+}
+/* --- Keyframe Animation for the Glow --- */
+@keyframes borderGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 60, 60, 0.6);
+    border-color: rgba(255, 60, 60, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgb(255, 0, 0);
+    border-color: rgba(255, 0, 0, 0.9);
+  }
 }
 
-h1 {
-    font-size: 18px;    
-    margin: 0;
+/* --- Logo --- */
+#logo {
+    width: 75px;
+    height: auto;
+    opacity: 0.9;
+    margin-bottom: 10px;
 }
+
+/* --- Typography --- */
+h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    color: #ffffff;
+    /* Optional: Add a subtle text glow to match the border */
+    text-shadow: 0 0 8px rgba(255, 60, 60, 0.5);
+}
+
 h2 {
     font-size: 0.9rem;
-    margin: 0 0 0.5rem 0;
-    font-weight: lighter;
+    margin: 4px 0 1rem 0;
+    font-weight: 300;
     font-style: italic;
-    color: rgba(166, 166, 166, 0.811);
+    color: #a0a0a0;
 }
+
+/* --- Buttons --- */
 button {
     padding: 10px 20px;
     cursor: pointer;
-    border: none;
-    font-size: .7rem;
-    border-radius: 5px;
-    background-color: #946f6f3a;
-    color: white;
-    transition: background-color 0.3s ease;
-}
-button:hover {
-    background-color: #946f6f;
-}
-button:active {
-    background-color: #7a5555;
-    transform: scale(0.97);
+    border: 1px solid transparent;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f0f0f0;
+    transition: all 0.2s ease-in-out;
+    backdrop-filter: blur(5px);
 }
 
+button:hover {
+    background-color: rgba(255, 87, 87, 0.7);
+    border-color: rgba(255, 87, 87, 0.9);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 87, 87, 0.3);
+}
+
+button:active {
+    background-color: rgba(255, 87, 87, 0.9);
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+
+/* --- Summary Section --- */
 #summary-section {
     text-align: center;
-    margin: 20px 0;
+    margin: 15px 0;
 }
 
 #summary-section p {
     margin: 10px 0;
+    font-size: 1rem;
 }
 
+#total-scanned {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* --- Breakdown Items --- */
 #breakdown-items {
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 5px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 15px;
 }
 
-    #count-green {
-        color: #69ff6e;
-        font-weight: bold;
-    }
-    #count-red {
-        color: #f05247;
-        font-weight: bold;
-    }
-    #count-yellow {
-        color: rgb(206, 206, 24);
-        font-weight: bold;
-    }
+.breakdown-item {
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    border-left: 4px solid transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
 
+.breakdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+#count-green {
+    color: #50fa7b;
+    font-weight: 700;
+    border-left-color: #50fa7b;
+}
+
+#count-red {
+    color: #ff5555;
+    font-weight: 700;
+    border-left-color: #ff5555;
+}
+
+#count-yellow {
+    color: #f1fa8c;
+    font-weight: 700;
+    border-left-color: #f1fa8c;
+}
+
+/* --- Action Buttons --- */
 #action-buttons {
     display: flex;
-    margin-top: 15px;
-    gap: 5px;
-    justify-content: center;
-}
-    #action-buttons button {
-        font-size: 0.9rem;
-        padding: .6rem .8rem;
-    }
-
-footer {
     margin-top: 20px;
+    gap: 10px;
+    justify-content: center;
     width: 100%;
+}
+
+#action-buttons button {
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+    flex-grow: 1; /* Make buttons fill the space */
+}
+
+/* --- Footer --- */
+footer {
+    margin-top: 25px;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
 }
 
 #footer-links {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #footer-links a {
-    color: #946f6f;
+    color: #a0a0a0;
     text-decoration: none;
     font-size: 0.8rem;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    transition: color 0.2s ease;
 }
 
 #footer-links a:hover {
-    color: #ffffff;
+    color: #ff5555;
 }
 
 #powered-by {
     text-align: center;
-    font-size: 0.7rem;
-    color: rgba(166, 166, 166, 0.811);
-    margin: 5px 0 0 0;
+    font-size: 0.75rem;
+    color: #888;
+    margin: 10px 0 0 0;
+}
+
+#powered-by span {
+    font-weight: bold;
+    color: #50fa7b; /* Gemini Nano green */
 }

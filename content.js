@@ -1,16 +1,19 @@
 // Spam detection keywords
 const SPAM_KEYWORDS = {
+  highOverride: [
+    'vitalii', 'Norman vitalii', 'Luna Rivers', 'Manifest the Unseen',
+  ],// keywords that always override AI
   high: [
-    'buy now', 'click here', 'free money', 'make money fast', 'earn cash',
-    'bitcoin', 'crypto', 'investment opportunity', 'get rich', 'prize winner',
-    'congratulations you won', 'claim your prize', 'limited time offer',
-    'act now', 'subscribe to my channel', 'check out my channel', 'sub4sub',
-    'onlyfans', 'telegram', 'whatsapp me', 'dm me', 'text me at'
+    'click here', 'subscribe to my channel', 'check out my channel', 'sub4sub',
+    'whatsapp me', 'dm me', 'text me at','check out my video',
+    'click link', 'check out my new video', 'vitalii', 'Buy crypto now!',
   ],
   medium: [
-    'check out', 'visit my', 'link in bio', 'click link', 'follow me',
-    'thanks for sharing', 'great info', 'nice video', 'awesome content',
-    'check my channel', 'new video', 'subscribe', 'sub back'
+    'visit my', 'link in bio', 'click link', 'follow me',
+    'sub back', 'bitcoin', 'crypto', 'discount code', 'giveaway',
+    'free trial', 'work from home', 'side hustle', 'online job',
+    'subscribe for updates','check out my similar content',
+    'money investing for me'
   ]
 };
 
@@ -20,20 +23,31 @@ function classifyByKeywords(text) {
 
   // Check high-risk keywords
   for (const keyword of SPAM_KEYWORDS.high) {
-    if (lowerText.includes(keyword)) {
+    if (lowerText.includes(keyword.toLowerCase())) {  // ✅ FIXED
       return 'spam';
     }
   }
-
-  // Check medium-risk keywords
+  
+  // Check medium-risk keywords  
   for (const keyword of SPAM_KEYWORDS.medium) {
-    if (lowerText.includes(keyword)) {
+    if (lowerText.includes(keyword.toLowerCase())) {  // ✅ FIXED
       return 'suspicious';
     }
   }
 
   return 'safe';
 }
+// Check for high override keywords (always spam)
+function isHighOverride(text) {
+  const lowerText = text.toLowerCase();
+  for (const keyword of SPAM_KEYWORDS.highOverride) {
+    if (lowerText.includes(keyword.toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 // Classify comment using AI (for suspicious cases only)
 async function classifyWithAI(text, aiSession, aiAvailable) {
@@ -43,7 +57,7 @@ async function classifyWithAI(text, aiSession, aiAvailable) {
 
   try {
     const result = await aiSession.prompt(
-      `Is this YouTube comment spam?\n\nComment: "${text}"\n\nAnswer:`
+      `Using the spam-detection guidelines already provided, classify the following YouTube comment as either "spam" or "safe" \n\nComment: "${text}"\n\nAnswer:`
     );
 
     const response = result.toLowerCase().trim();
@@ -65,22 +79,23 @@ async function classifyWithAI(text, aiSession, aiAvailable) {
 
 // Hybrid classification: Keywords + AI
 async function classifyComment(text, aiSession, aiAvailable) {
+  // Check if this is an override keyword
+  if (isHighOverride(text)) {
+    return { classification: 'spam', usedAI: false }; // Always spam, never rewritten by AI
+  }
+
   // TIER 1: Fast keyword check
   const keywordResult = classifyByKeywords(text);
 
-  // If obviously spam or safe, return immediately
-  if (keywordResult === 'spam' || keywordResult === 'safe') {
-    return { classification: keywordResult, usedAI: false };
-  }
-
-  // TIER 2: Use AI for ambiguous "suspicious" cases
-  if (keywordResult === 'suspicious' && aiAvailable) {
+  // If spam or safe, now uses AI for everything that's NOT override
+  if ((keywordResult === 'spam' || keywordResult === 'suspicious') && aiAvailable) {
+    // Ask AI to rewrite
     const aiResult = await classifyWithAI(text, aiSession, aiAvailable);
     return { classification: aiResult, usedAI: true };
   }
 
-  // Fallback: No AI available
-  return { classification: 'suspicious', usedAI: false };
+  // For 'safe' (and when no AI), fallback to keywordResult
+  return { classification: keywordResult, usedAI: false };
 }
 
 // ============================================
@@ -136,7 +151,8 @@ function findCommentSection(url) {
 
   return null;
 }
-
+  
+//ignore: unused edit
 // Export for testing (only in test environment)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -172,6 +188,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     try {
       // Check if the API exists
       if (typeof LanguageModel === 'undefined') {
+        console.log(typeof LanguageModel);
         console.log('Spamurai: LanguageModel API not available');
         return false;
       }
@@ -186,18 +203,25 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
       }
 
       if (availability === 'after-download') {
-        console.log('Spamurai: Gemini Nano model needs to be downloaded');
+        console.log('Spamurai: Gemini Nano model needs to be downloaded check readme for instruction https://github.com/Kamiz660/SpamuraiAI-web-extension/tree/main');
         console.log('Visit chrome://components/ and update "Optimization Guide On Device Model"');
         return false;
       }
 
       // Create AI session with spam detection prompt
       aiSession = await LanguageModel.create({
-        systemPrompt: `You are a spam detector for YouTube comments. 
-        Analyze if a comment is spam or legitimate.
-        Spam includes: self-promotion, scams, bots, fake engagement, phishing.
-        Legitimate includes: genuine opinions, questions, discussions.
-        Reply with ONLY one word: "spam" or "safe".`,
+             temperature: 0.1,
+             topK: 3,   // low creativity for consistent classification
+             initialPrompts: [
+          {
+            role: 'system',
+            content: `You are a comment moderation model for YouTube.\n\nYour job is to classify comments as either 'spam' or 'safe'. Follow these rules strictly:\n\n1. Mark as **spam** only if the comment tries to persuade readers to buy, invest, or follow someone for profit.\n2. Do **not** mark as spam if the comment merely debates, predicts, or discusses markets, politics, or opinions.\n3. 
+            Mark as **spam** if the comment:\n   - Promotes or sells a product, service, channel, or person (for example: 'thanks to Mr. X', 'contact me on Telegram', 'my mentor helped me earn money').\n   - Uses testimonials or fake stories 
+            (for example: 'I made 10x returns after reading *Manifest the Unseen*').\n4. 
+            If uncertain, always choose **safe**.\n\nExamples:\n- 'Crypto market is becoming bigger than Indian economy. 
+            Future is blockchain and AI!' → safe\n- 'Right now, people all over the world are changing their lives with *Manifest the Unseen* by Luna Rivers' → spam\n\nOutput strictly one word: either 'spam' or 'safe'. No punctuation, no explanation.`
+          }
+        ],
         expectedInputs: [
           { type: "text", languages: ["en"] }
         ],
@@ -264,6 +288,26 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
       }
     });
   }
+  
+// Check if comment is from channel owner
+function isChannelOwnerComment(threadElement) {
+  // YouTube marks channel owner comments with special badges/attributes
+  // Check for creator badge
+  const creatorBadge = threadElement.querySelector('ytd-author-comment-badge-renderer[creator]');
+  if (creatorBadge) return true;
+
+  // Check for creator attribute on comment renderer
+  const commentRenderer = threadElement.querySelector('ytd-comment-renderer[is-creator]');
+  if (commentRenderer) return true;
+
+  // Alternative: Check for "creator" class on badge
+  const anyCreatorBadge = threadElement.querySelector('[class*="creator"]');
+  if (anyCreatorBadge && anyCreatorBadge.closest('#author-comment-badge')) {
+    return true;
+  }
+
+  return false;
+}
 
   // Analyze comments with instant keyword detection
   async function analyzeComments() {
@@ -271,6 +315,10 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     let newSuspicious = [];
 
     for (const thread of threads) {
+        // Skips channel owner comments
+      if (isChannelOwnerComment(thread)) {
+        continue;
+      }
       const commentEl = thread.querySelector('#content-text');
       const text = commentEl ? commentEl.textContent.trim() : null;
 
@@ -328,7 +376,6 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     if (isProcessingAI || !aiAvailable || suspiciousComments.length === 0) {
       return;
     }
-
     isProcessingAI = true;
 
     // Process in batches of 5 for better performance
@@ -340,7 +387,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
       // Process batch in parallel
       await Promise.all(batch.map(async ({ text, thread }) => {
         try {
-          const aiResult = await classifyWithAI(text, aiSession, aiAvailable);
+          const aiResult =  await classifyWithAI(text, aiSession, aiAvailable);
 
           // Update stored classification
           const stored = analyzedComments.get(text);
@@ -503,7 +550,11 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   }, true);
 
   // Periodic re-scan every 3s
-  setInterval(() => {
-    analyzeComments();
-  }, 3000);
+ let runs = 0;
+ const id = setInterval(() => {
+  analyzeComments();
+  runs++;
+  if (runs >= 2) clearInterval(id);
+}, 3000);
+
 }

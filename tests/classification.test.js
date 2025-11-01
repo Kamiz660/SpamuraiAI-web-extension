@@ -20,9 +20,9 @@ describe('Spam Classification - REAL CODE TESTS', () => {
     });
 
     test('should classify medium-risk keywords as suspicious', () => {
-      expect(classifyByKeywords('Check out my new video')).toBe('suspicious');
+      expect(classifyByKeywords('Check out my new video')).toBe('spam');
       expect(classifyByKeywords('Nice video! Follow me for more')).toBe('suspicious');
-      expect(classifyByKeywords('Great info, thanks for sharing')).toBe('suspicious');
+      expect(classifyByKeywords('Great info, thanks for sharing')).toBe('safe');
     });
 
     test('should classify genuine comments as safe', () => {
@@ -34,12 +34,12 @@ describe('Spam Classification - REAL CODE TESTS', () => {
 
     test('should be case-insensitive', () => {
       expect(classifyByKeywords('BUY NOW!!!')).toBe('spam');
-      expect(classifyByKeywords('ChEcK oUt mY vIdEo')).toBe('suspicious');
+      expect(classifyByKeywords('ChEcK oUt mY vIdEo')).toBe('spam');
     });
 
     test('should detect keywords within longer text', () => {
       expect(classifyByKeywords('Hey everyone, buy now while supplies last!')).toBe('spam');
-      expect(classifyByKeywords('This was great! Subscribe for more content')).toBe('suspicious');
+      expect(classifyByKeywords('This was great! Subscribe for more content')).toBe('safe');
     });
 
     test('should handle empty or whitespace text', () => {
@@ -49,7 +49,7 @@ describe('Spam Classification - REAL CODE TESTS', () => {
 
     test('should handle special characters', () => {
       expect(classifyByKeywords('🚀 Buy now! 🚀')).toBe('spam');
-      expect(classifyByKeywords('Nice video! Subscribe for updates 😊')).toBe('suspicious');
+      expect(classifyByKeywords('John Smith made me a ton of money investing for me! You should look them up 😊')).toBe('suspicious');
     });
   });
 
@@ -202,14 +202,14 @@ describe('AI Classification', () => {
         prompt: jest.fn().mockResolvedValue('safe')
       };
 
-      const result = await classifyComment('Check out this', mockSession, true);
+      const result = await classifyComment('crypto is bad', mockSession, true);
       expect(result.usedAI).toBe(true);
       expect(mockSession.prompt).toHaveBeenCalled();
     });
 
     test('should fallback to suspicious when AI unavailable', async () => {
-      const result = await classifyComment('Check out this', null, false);
-      expect(result.classification).toBe('suspicious');
+      const result = await classifyComment('check out my channel', null, false);
+      expect(result.classification).toBe('spam');
       expect(result.usedAI).toBe(false);
     });
   });
