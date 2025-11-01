@@ -12,7 +12,11 @@
       "js": ["content.js"]
     }
   ],
-
+"icons": {
+  "16": "./assets/icon.png",
+  "48": "./assets/icon.png",
+  "128": "./assets/icon.png"
+},
   "action": {
     "default_popup": "./popup/popup.html",
     "default_icon" : "./assets/icon.png"

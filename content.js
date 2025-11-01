@@ -1,7 +1,7 @@
 // Spam detection keywords
 const SPAM_KEYWORDS = {
   highOverride: [
-    'vitalii'
+    'vitalii', 'Norman vitalii', 'Luna Rivers', 'Manifest the Unseen',
   ],// keywords that always override AI
   high: [
     'click here', 'subscribe to my channel', 'check out my channel', 'sub4sub',
@@ -57,7 +57,7 @@ async function classifyWithAI(text, aiSession, aiAvailable) {
 
   try {
     const result = await aiSession.prompt(
-      `Is this YouTube comment spam?\n\nComment: "${text}"\n\nAnswer:`
+      `Using the spam-detection guidelines already provided, classify the following YouTube comment as either "spam" or "safe" \n\nComment: "${text}"\n\nAnswer:`
     );
 
     const response = result.toLowerCase().trim();
@@ -202,18 +202,25 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
       }
 
       if (availability === 'after-download') {
-        console.log('Spamurai: Gemini Nano model needs to be downloaded');
+        console.log('Spamurai: Gemini Nano model needs to be downloaded check readme for instruction https://github.com/Kamiz660/SpamuraiAI-web-extension/tree/main');
         console.log('Visit chrome://components/ and update "Optimization Guide On Device Model"');
         return false;
       }
 
       // Create AI session with spam detection prompt
       aiSession = await LanguageModel.create({
-        systemPrompt: `You are a spam detector for YouTube comments. 
-        Analyze if a comment is spam or legitimate.
-        Spam includes: self-promotion, scams, bots, fake engagement, phishing.
-        Legitimate includes: genuine opinions, questions, discussions.
-        Reply with ONLY one word: "spam" or "safe".`,
+             temperature: 0.1,
+             topK: 3,   // low creativity for consistent classification
+             initialPrompts: [
+          {
+            role: 'system',
+            content: `You are a comment moderation model for YouTube.\n\nYour job is to classify comments as either 'spam' or 'safe'. Follow these rules strictly:\n\n1. Mark as **spam** only if the comment tries to persuade readers to buy, invest, or follow someone for profit.\n2. Do **not** mark as spam if the comment merely debates, predicts, or discusses markets, politics, or opinions.\n3. 
+            Mark as **spam** if the comment:\n   - Promotes or sells a product, service, channel, or person (for example: 'thanks to Mr. X', 'contact me on Telegram', 'my mentor helped me earn money').\n   - Uses testimonials or fake stories 
+            (for example: 'I made 10x returns after reading *Manifest the Unseen*').\n4. 
+            If uncertain, always choose **safe**.\n\nExamples:\n- 'Crypto market is becoming bigger than Indian economy. 
+            Future is blockchain and AI!' → safe\n- 'Right now, people all over the world are changing their lives with *Manifest the Unseen* by Luna Rivers' → spam\n\nOutput strictly one word: either 'spam' or 'safe'. No punctuation, no explanation.`
+          }
+        ],
         expectedInputs: [
           { type: "text", languages: ["en"] }
         ],
