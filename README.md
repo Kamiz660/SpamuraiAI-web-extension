@@ -2,6 +2,8 @@
 
 Real-time YouTube comment spam filter powered by on-device Gemini Nano.
 Spamurai scans, flags, and highlights scam or spam comments directly on YouTube and no data leaves your machine.
+ [![Watch the video](https://youtu.be/jvlPI-W4gU0?si=U1x2duWEnr_Akovh/0.jpg)](https://youtu.be/jvlPI-W4gU0?si=U1x2duWEnr_Akovh)
+
 <!-- ------------------------------ -->
 
 ## <h2 style="margin-top: 40px;">⚙️ Overview</h2>
