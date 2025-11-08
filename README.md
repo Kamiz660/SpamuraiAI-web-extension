@@ -67,5 +67,7 @@ most comments appear in crypto, trading and book recomendations
 
 - Gemini Nano Prompt API (on-device AI)
 - YouTube DOM observer system
-- Spamurai’s classification model trained on real comment patternsSpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), so the scripts will not run on other websites.
+- keyowrds detection database of known scammer data
+  
+SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), so the scripts will not run on other websites.
   
