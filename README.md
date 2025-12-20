@@ -1,13 +1,19 @@
 # SpamuraiAI
 
-Real-time YouTube comment spam filter powered by on-device Gemini Nano.
-Spamurai scans, flags, and highlights scam or spam comments directly on YouTube and no data leaves your machine.
+Real-time YouTube comment spam highlighter powered by on-device Gemini Nano.  
+SpamuraiAI scans comments for spam, scams, and low-effort junk, and highlights them directly on YouTube so no data leaves your machine.  
+
+Click below image to watch the video
 
 [![Watch the video](https://img.youtube.com/vi/jvlPI-W4gU0/0.jpg)](https://youtu.be/jvlPI-W4gU0)
 
+
+<img width="378" height="665" alt="Screenshot_5" src="https://github.com/user-attachments/assets/66234d1e-7114-4db5-add6-a67e1c188a55" />
+
 <!-- ------------------------------ -->
 
-## <h2 style="margin-top: 40px;">⚙️ Overview</h2>
+## ⚙️ Overview
+
 SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), so the scripts will not run on other websites.
 <br>
 
@@ -15,7 +21,7 @@ SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), 
 
 - Chrome latest version
 - Operating system: Windows 10 or 11; macOS 13+ (Ventura and onwards); Linux; or ChromeOS (from Platform 16389.0.0 and onwards) on Chromebook Plus devices. Chrome for Android, iOS, and ChromeOS on non-Chromebook Plus devices are not yet supported by the APIs which use Gemini Nano.
-- Storage: At least 22 GB of free space on the volume that contains your Chrome profile. (it is small in size but won't isnstall if not enough free space)
+- Storage: At least 22 GB of free space on the volume that contains your Chrome profile. (it is small in size but won't install if not enough free space)
   
 <br>
 
@@ -26,19 +32,21 @@ SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), 
 
 ### 2️⃣ Downloading Gemini Nano
 1. Open a new tab and go to: chrome://flags → Enable Prompt API for Gemini Nano → click relaunch Chrome popup
-3. Open the developer console(crtl+shift+j) and paste the following to download the AI model:
-``const session = await LanguageModel.create({
-  monitor(m) {
-    m.addEventListener('downloadprogress', (e) => {
-      const percent = Math.round((e.loaded * 100) / 10) * 10;
-      console.log(`Downloaded ${percent}%`);
-    });
-  },
-});``
+2. Open the developer console(Ctrl+Shift+J) and paste the following to download the AI model:
+```javascript
+const session = await LanguageModel.create({
+monitor(m) {
+m.addEventListener('downloadprogress', (e) => {
+const percent = Math.round((e.loaded * 100) / 10) * 10;
+console.log(`Downloaded ${percent}%`);
+});
+},
+});
+```
 
  *(If Chrome blocks pasting, type allow pasting and try again)*
 
-Spamurai will automatically begin scanning and highlighting spam comments once the model is ready
+SpamuraiAI will automatically begin scanning and highlighting spam comments once the model is ready
 
 
 ## 🧩 Troubleshooting
@@ -47,13 +55,16 @@ If Spamurai AI isn’t working properly, follow these steps:
 
 1. Open a new tab and go to: chrome://flags
 2. Set "Enables optimization guide on device" to "Enabled BypassPerfRequirement"
-   -It’s a support flag Google uses to let the local AI service run even on systems that don’t meet performance checks.
+   - It’s a support flag Google uses to let the local AI service run even on systems that don’t meet performance checks.
 3. Click relaunch Chrome popup
 
 ## Working Example
+
+Below are examples of how it shows up on youtube comments for spam comments
+most comments appear in crypto, trading and book recommendations
+
 <img width="965" height="603" alt="example" src="https://github.com/user-attachments/assets/e6e87abf-256b-49c2-9c66-04a4f4dac312" />
-examples of how it shows up on youtube comments for spam comments
-most comments appear in crypto, trading and book recomendations
+
 <br>
 
 ## 🔍 How the Scraper Works
@@ -67,7 +78,5 @@ most comments appear in crypto, trading and book recomendations
 
 - Gemini Nano Prompt API (on-device AI)
 - YouTube DOM observer system
-- keyowrds detection database of known scammer data
-  
-SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), so the scripts will not run on other websites.
-  
+- keyword detection database of known scammer data
+    
