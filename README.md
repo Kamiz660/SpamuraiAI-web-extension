@@ -1,7 +1,7 @@
 # SpamuraiAI
 
-Real-time YouTube comment spam highlighter powered by on-device Gemini Nano.  
-SpamuraiAI scans comments for spam, scams, and low-effort junk, and highlights them directly on YouTube so no data leaves your machine.  
+**Real-time YouTube comment spam filter powered by on-device Gemini Nano** <br>
+SpamuraiAI scans, flags, and highlights scam or spam comments directly on YouTube. <br> By using the Web AI Prompt API, no data ever leaves your machine, keeping your browsing private and secure.
 
 Click below image to watch the video
 
@@ -12,9 +12,20 @@ Click below image to watch the video
 
 <!-- ------------------------------ -->
 
+## Working Example
+
+Below are examples of how it shows up on youtube comments for spam comments
+most comments appear in crypto, trading and book recommendations
+
+<img width="965" height="603" alt="example" src="https://github.com/user-attachments/assets/e6e87abf-256b-49c2-9c66-04a4f4dac312" />
+
+<br>
+
 ## ⚙️ Overview
 
-SpamuraiAI only runs on YouTube videos and shorts (as defined in the manifest), so the scripts will not run on other websites.
+SpamuraiAI runs specifically on YouTube (as defined in the `manifest.json`). It observes the DOM for new comments as you scroll and applies classification in two tiers:
+1. **Tier 1 (Instant)**: High-speed keyword matching for known scam patterns.
+2. **Tier 2 (AI)**: Suspicious comments are refined using **Gemini Nano** to reduce false positives.
 <br>
 
 ## 💻 Hardware Requirements
@@ -58,25 +69,30 @@ If Spamurai AI isn’t working properly, follow these steps:
    - It’s a support flag Google uses to let the local AI service run even on systems that don’t meet performance checks.
 3. Click relaunch Chrome popup
 
-## Working Example
-
-Below are examples of how it shows up on youtube comments for spam comments
-most comments appear in crypto, trading and book recommendations
-
-<img width="965" height="603" alt="example" src="https://github.com/user-attachments/assets/e6e87abf-256b-49c2-9c66-04a4f4dac312" />
-
-<br>
 
 ## 🔍 How the Scraper Works
 
 1. Navigate to a YouTube video page.  
 2. The console will log the video title, and the observer will be waiting.  
 3. Whenever you scroll down, the observer detects the first 20 comments (or however many load) and outputs them as a logged array.
+4. 
+## 🛠️ For Developers
 
+Spamurai includes a suite of unit tests using Jest.
+```bash
+# Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run specific tests
+npm run test:classification
+```
 
 🧠 Powered by
 
 - Gemini Nano Prompt API (on-device AI)
-- YouTube DOM observer system
+- YouTube DOM MutationObserver
 - keyword detection database of known scammer data
     
